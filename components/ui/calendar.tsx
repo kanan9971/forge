@@ -1,12 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { DayPicker, type DayPickerSingleProps } from 'react-day-picker';
+import { DayPicker } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 
 import 'react-day-picker/dist/style.css';
 
-type Props = DayPickerSingleProps & {
+type Props = React.ComponentProps<typeof DayPicker> & {
   className?: string;
 };
 

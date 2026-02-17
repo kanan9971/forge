@@ -3,17 +3,19 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignup, setIsSignup] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const handleAuth = async () => {
-    const next = searchParams.get('next') || '/dashboard';
+    const next =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('next') || '/dashboard'
+        : '/dashboard';
 
     if (isSignup) {
       const { data, error } = await supabase.auth.signUp({ email, password });
