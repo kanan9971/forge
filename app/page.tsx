@@ -9,9 +9,12 @@ export default function Home() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignup, setIsSignup] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const handleAuth = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     const next =
       typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search).get('next') || '/dashboard'
@@ -19,16 +22,29 @@ export default function Home() {
 
     if (isSignup) {
       const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) return alert(error.message);
+      if (error) {
+        setIsSubmitting(false);
+        return alert(error.message);
+      }
       // If email confirmation is enabled, session may be null.
-      if (!data.session) return alert('Check your email to confirm your account, then log in.');
+      if (!data.session) {
+        setIsSubmitting(false);
+        return alert('Check your email to confirm your account, then log in.');
+      }
       router.push(next);
+      router.refresh();
+      setIsSubmitting(false);
       return;
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return alert(error.message);
+    if (error) {
+      setIsSubmitting(false);
+      return alert(error.message);
+    }
     router.push(next);
+    router.refresh();
+    setIsSubmitting(false);
   };
 
   return (
@@ -49,8 +65,8 @@ export default function Home() {
           onChange={(e) => setPassword(e.target.value)}
           className="mb-6"
         />
-        <Button onClick={handleAuth} className="w-full mb-4">
-          {isSignup ? 'Sign Up' : 'Log In'}
+        <Button onClick={handleAuth} className="w-full mb-4" disabled={isSubmitting}>
+          {isSubmitting ? 'Please wait...' : isSignup ? 'Sign Up' : 'Log In'}
         </Button>
         <p className="text-center text-zinc-400">
           {isSignup ? 'Already have an account?' : 'No account?'}{' '}
